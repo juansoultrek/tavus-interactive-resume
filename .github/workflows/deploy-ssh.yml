@@ -1,0 +1,83 @@
+# Remote host details and credentials live only in GitHub Secrets — nothing sensitive in this file.
+# Upload config/prompts.json on the server separately (not in this bundle).
+
+name: Deploy production (SSH)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-tavus-interactive-resume
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install and build
+        run: npm ci --no-audit --no-fund && npm run build
+
+      - name: Production node_modules for bundle
+        run: rm -rf node_modules && npm ci --omit=dev --no-audit --no-fund
+
+      - name: Pack deploy bundle
+        run: |
+          tar -czf deploy-bundle.tar.gz \
+            dist \
+            server \
+            config/prompts.example.json \
+            package.json \
+            package-lock.json \
+            server.js \
+            node_modules
+
+      - name: Upload bundle via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_SSH_HOST }}
+          username: ${{ secrets.DEPLOY_SSH_USERNAME }}
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.DEPLOY_SSH_PORT }}
+          source: deploy-bundle.tar.gz
+          target: ${{ secrets.DEPLOY_REMOTE_APP_DIR }}
+          overwrite: true
+          debug: false
+
+      - name: Extract on server
+        env:
+          REMOTE_DIR: ${{ secrets.DEPLOY_REMOTE_APP_DIR }}
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.DEPLOY_SSH_HOST }}
+          username: ${{ secrets.DEPLOY_SSH_USERNAME }}
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.DEPLOY_SSH_PORT }}
+          envs: REMOTE_DIR
+          debug: false
+          script: |
+            set -euo pipefail
+            cd "${REMOTE_DIR}"
+            rm -rf node_modules dist server
+            mkdir -p config
+            tar -xzf deploy-bundle.tar.gz
+            rm -f deploy-bundle.tar.gz
+            if [ ! -f config/prompts.json ] && [ -f config/prompts.example.json ]; then
+              cp config/prompts.example.json config/prompts.json
+            fi
+            mkdir -p tmp
+            touch tmp/restart.txt
