@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import express from 'express'
-import { createConversation, endConversation } from './tavus.ts'
+import { createConversation, endConversation, getLastSyncedPromptHash, syncPalSystemPrompt } from './tavus.ts'
 import { getPromptById, getPublicCatalog, loadPrompts } from './prompts.ts'
 
 const app = express()
@@ -40,7 +40,18 @@ routes.get('/health', (_req, res) => {
     palIdSet: Boolean(process.env.TAVUS_PAL_ID?.trim()),
     faceIdSet: Boolean(process.env.TAVUS_FACE_ID?.trim()),
     promptsLoaded,
+    palPromptSyncedHash: getLastSyncedPromptHash(),
   })
+})
+
+routes.post('/api/sync-pal', async (_req, res) => {
+  try {
+    const result = await syncPalSystemPrompt()
+    res.json({ ok: true, ...result })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to sync PAL'
+    res.status(502).json({ error: message })
+  }
 })
 
 routes.get('/api/prompts', (_req, res) => {

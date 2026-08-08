@@ -1,6 +1,6 @@
 # Persona knowledge template
 
-Copy this file and replace the placeholders with **your** bio before wiring a Tavus PAL.
+Replace the placeholders with **your** bio. This file is appended into the remote PAL `system_prompt` (via API) together with `system-prompt.md`.
 Do not invent employers, dates, metrics, or certifications that are not listed here.
 
 ## Professional summary

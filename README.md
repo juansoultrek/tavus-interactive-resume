@@ -18,7 +18,9 @@ cp config/prompts.example.json config/prompts.json
 
 Edit `.env` with your Tavus credentials. Edit `config/prompts.json` with your categories and questions (or keep the generic example).
 
-Fill `knowledge/persona.md` and paste `knowledge/system-prompt.md` into your Tavus PAL so answers stay grounded.
+Fill `knowledge/persona.md` with your bio. `knowledge/system-prompt.md` is the behavior prompt.
+
+On each new conversation (and via `POST /api/sync-pal`), the server **PATCHes** your remote Tavus PAL (`TAVUS_PAL_ID`) so `system_prompt` matches those files. No manual paste in the Tavus dashboard required after the first PAL exists.
 
 ## Run locally
 

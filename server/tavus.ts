@@ -1,3 +1,5 @@
+import { buildSystemPromptFromKnowledge, systemPromptHash } from './knowledge.ts'
+
 type CreateConversationInput = {
   conversational_context?: string
   custom_greeting?: string
@@ -8,6 +10,8 @@ type TavusConversation = {
   conversation_id: string
   conversation_url: string
 }
+
+let lastSyncedPromptHash: string | null = null
 
 function requireApiKey(): string {
   const apiKey = process.env.TAVUS_API_KEY?.trim()
@@ -26,7 +30,7 @@ function buildCreateBody(input: CreateConversationInput): Record<string, unknown
   }
 
   const body: Record<string, unknown> = {
-    conversation_name: input.conversation_name ?? 'Tavus Interactive Resume',
+    conversation_name: input.conversation_name ?? 'Interactive Resume',
   }
 
   if (palId) body.pal_id = palId
@@ -41,9 +45,68 @@ function buildCreateBody(input: CreateConversationInput): Record<string, unknown
   return body
 }
 
+/** Push local knowledge/*.md to the remote Tavus PAL system_prompt. */
+export async function syncPalSystemPrompt(): Promise<{ synced: boolean; hash: string }> {
+  const palId = process.env.TAVUS_PAL_ID?.trim()
+  if (!palId) {
+    throw new Error('TAVUS_PAL_ID is required to sync system prompt remotely')
+  }
+
+  const prompt = buildSystemPromptFromKnowledge()
+  const hash = systemPromptHash(prompt)
+
+  if (hash === lastSyncedPromptHash) {
+    return { synced: false, hash }
+  }
+
+  const apiKey = requireApiKey()
+  const llmModel = process.env.TAVUS_LLM_MODEL?.trim() || 'tavus-gpt-4.1'
+  const response = await fetch(
+    `https://tavusapi.com/v2/pals/${encodeURIComponent(palId)}`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+      },
+      body: JSON.stringify([
+        {
+          op: 'replace',
+          path: '/system_prompt',
+          value: prompt,
+        },
+        // Existing PALs may still reference deprecated tavus-llama* models;
+        // Tavus revalidates layers on patch, so keep LLM on a supported model.
+        {
+          op: 'replace',
+          path: '/layers/llm/model',
+          value: llmModel,
+        },
+      ]),
+    },
+  )
+
+  if (!response.ok) {
+    const data = (await response.json().catch(() => ({}))) as Record<string, unknown>
+    const message =
+      (typeof data.message === 'string' && data.message) ||
+      (typeof data.error === 'string' && data.error) ||
+      `Tavus PAL patch error ${response.status}`
+    throw new Error(message)
+  }
+
+  lastSyncedPromptHash = hash
+  return { synced: true, hash }
+}
+
 export async function createConversation(
   input: CreateConversationInput = {},
 ): Promise<TavusConversation> {
+  // Keep the remote PAL aligned with repo knowledge before opening a room.
+  if (process.env.TAVUS_PAL_ID?.trim()) {
+    await syncPalSystemPrompt()
+  }
+
   const apiKey = requireApiKey()
   const response = await fetch('https://tavusapi.com/v2/conversations', {
     method: 'POST',
@@ -94,4 +157,8 @@ export async function endConversation(conversationId: string): Promise<void> {
       `Tavus error ${response.status}`
     throw new Error(message)
   }
+}
+
+export function getLastSyncedPromptHash(): string | null {
+  return lastSyncedPromptHash
 }
