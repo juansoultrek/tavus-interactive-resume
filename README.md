@@ -1,6 +1,8 @@
 # Tavus Interactive Resume
 
-Cloneable demo: start a **Tavus** conversational video call from a **JSON prompt catalog**, using **Vite + React**, **Express**, and **`@tavus/cvi-ui`** (no iframe).
+A small demo app where visitors click interview-style questions and talk **face-to-face on video** with an AI persona (powered by [Tavus](https://www.tavus.io)). Useful as a starting point for an interactive resume or portfolio “talk to me” experience.
+
+Under the hood: **Vite + React**, **Express**, and Tavus’s conversational video UI (**no iframe**), with questions loaded from a **JSON** catalog.
 
 ---
 
