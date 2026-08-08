@@ -14,6 +14,8 @@ dist-ssr
 .env
 .env.*
 !.env.example
+config/prompts.json
+!config/prompts.example.json
 
 # Editor directories and files
 .vscode/*
