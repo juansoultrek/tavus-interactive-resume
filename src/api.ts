@@ -10,6 +10,28 @@ export type CreateConversationBody = {
   conversation_name?: string
 }
 
+export type PublicCatalog = {
+  categories: {
+    id: string
+    label: string
+    prompts: { id: string; label: string }[]
+  }[]
+}
+
+export async function fetchPromptCatalog(): Promise<PublicCatalog> {
+  const response = await fetch('/api/prompts')
+  const data = (await response.json().catch(() => ({}))) as Record<string, unknown>
+
+  if (!response.ok) {
+    const message =
+      (typeof data.error === 'string' && data.error) ||
+      `Failed to load prompts (${response.status})`
+    throw new Error(message)
+  }
+
+  return data as PublicCatalog
+}
+
 export async function createConversation(
   body: CreateConversationBody = {},
 ): Promise<TavusConversation> {
