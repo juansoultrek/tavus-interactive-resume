@@ -1,45 +1,28 @@
-# Deploy (cPanel / Namecheap)
+# Deploy notes (optional)
 
-This lab deploys as a **Node Passenger** app (same idea as the Nango lab). The public site `juanvillegas.dev` is separate and is **not** required to clone or run this repo.
+The GitHub Action [`.github/workflows/deploy-ssh.yml`](../.github/workflows/deploy-ssh.yml) is an **example** SSH deploy for a Node/Passenger host (build on Ubuntu → pack → SCP → extract → `tmp/restart.txt`).
 
-## GitHub Actions
+Clones can **ignore or delete** that workflow. Local `npm run dev` / `npm run build` do not use it.
 
-Workflow: [`.github/workflows/deploy-ssh.yml`](../.github/workflows/deploy-ssh.yml)
+## If you use the workflow
 
-Secrets:
+GitHub Secrets (typical):
 
 - `DEPLOY_SSH_HOST`
 - `DEPLOY_SSH_PORT`
 - `DEPLOY_SSH_USERNAME`
 - `DEPLOY_SSH_PRIVATE_KEY`
-- `DEPLOY_REMOTE_APP_DIR` — e.g. `public_html/talk.juanvillegas.dev`
+- `DEPLOY_REMOTE_APP_DIR`
 
-The CI bundle ships **empty/generic** templates only. It does **not** overwrite your real bio or production prompts on the host.
+On the host: Node app, startup file `server.js`, env vars from `.env.example`.
 
-## On the host (once)
+## Private content via SCP
 
-1. Create a Node.js app in cPanel Application Manager.
-2. Startup file: `server.js`
-3. Set env vars: `TAVUS_API_KEY`, `TAVUS_PAL_ID`, optional `TAVUS_FACE_ID`, `TAVUS_LLM_MODEL`, `PORT` (Passenger), optional `APP_BASE_PATH` (leave empty on a subdomain root).
-4. Point DNS (e.g. `talk.juanvillegas.dev`) at this app directory.
-
-## Secrets / private content via SCP (not in git)
-
-Keep real data **only on the server** (or a private machine), then upload:
+Keep real catalogs/bios off public git:
 
 ```bash
-# from your machine (paths are examples)
 scp config/prompts.json user@host:~/path/to/app/config/prompts.json
 scp knowledge/persona.md user@host:~/path/to/app/knowledge/persona.md
 ```
 
-| File on server | In public repo? | Notes |
-|----------------|-----------------|--------|
-| `config/prompts.json` | No (gitignored) | Production question catalog |
-| `knowledge/persona.md` | Template only in git | Real bio via SCP; CI does not ship this file |
-| `knowledge/system-prompt.md` | Yes (generic) | Behavior prompt; safe to redeploy |
-| `.env` / cPanel env | No | API keys |
-
-After uploading `persona.md`, start a new conversation (or `POST /api/sync-pal`) so the server PATCHes the remote Tavus PAL.
-
-The portfolio botonera on `juanvillegas.dev` can link to `https://talk.juanvillegas.dev/?prompt=<id>` later; keep prompt ids aligned with that catalog.
+The CI bundle ships generic templates only; it does not upload your private `prompts.json` / filled `persona.md`.
