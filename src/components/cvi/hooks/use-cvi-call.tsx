@@ -9,19 +9,14 @@ export const useCVICall = (): {
 
 	const joinCall = useCallback(
 		({ url }: { url: string }) => {
-			daily?.join({
-				url: url,
-				inputSettings: {
-					audio: {
-						processor: {
-							type: 'noise-cancellation',
-						},
-					},
-				},
-			});
+			if (!daily) return
+			void daily.join({ url }).catch((error: unknown) => {
+				console.error('Failed to join Tavus Daily room', error)
+			})
 		},
 		[daily]
-	);
+	)
+
 
 	const leaveCall = useCallback(() => {
 		daily?.leave();
