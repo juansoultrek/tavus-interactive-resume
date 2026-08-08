@@ -1,4 +1,5 @@
 import express from 'express'
+import { getPromptById } from '../shared/prompts.ts'
 import { createConversation, endConversation } from './tavus.ts'
 
 const app = express()
@@ -18,14 +19,28 @@ app.get('/health', (_req, res) => {
 
 app.post('/api/conversations', async (req, res) => {
   try {
+    const promptId = typeof req.body?.promptId === 'string' ? req.body.promptId : undefined
+    const prompt = promptId ? getPromptById(promptId) : undefined
+
+    if (promptId && !prompt) {
+      res.status(400).json({ error: `Unknown promptId: ${promptId}` })
+      return
+    }
+
     const conversational_context =
-      typeof req.body?.conversational_context === 'string'
+      prompt?.conversational_context ??
+      (typeof req.body?.conversational_context === 'string'
         ? req.body.conversational_context
-        : undefined
+        : undefined)
     const custom_greeting =
-      typeof req.body?.custom_greeting === 'string' ? req.body.custom_greeting : undefined
+      prompt?.custom_greeting ??
+      (typeof req.body?.custom_greeting === 'string' ? req.body.custom_greeting : undefined)
     const conversation_name =
-      typeof req.body?.conversation_name === 'string' ? req.body.conversation_name : undefined
+      typeof req.body?.conversation_name === 'string'
+        ? req.body.conversation_name
+        : prompt
+          ? `Resume: ${prompt.label}`
+          : 'Tavus Interactive Resume'
 
     const conversation = await createConversation({
       conversational_context,

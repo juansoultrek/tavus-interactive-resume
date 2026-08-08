@@ -4,6 +4,7 @@ export type TavusConversation = {
 }
 
 export type CreateConversationBody = {
+  promptId?: string
   conversational_context?: string
   custom_greeting?: string
   conversation_name?: string
