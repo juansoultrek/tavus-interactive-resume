@@ -1,12 +1,18 @@
 {
   "name": "tavus-interactive-resume",
-  "private": true,
-  "version": "0.0.0",
+  "private": false,
+  "version": "0.1.0",
   "type": "module",
+  "description": "Cloneable interactive resume lab: Tavus CVI + Express + prompt catalog from JSON.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vite",
     "dev:server": "node --env-file=.env ./node_modules/tsx/dist/cli.mjs watch server/index.ts",
     "build": "tsc -b && vite build",
+    "start": "node --import tsx server/index.ts",
     "lint": "oxlint",
     "preview": "vite preview"
   },
@@ -16,7 +22,8 @@
     "express": "^5.2.1",
     "jotai": "^2.20.2",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "tsx": "^4.23.11"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
@@ -25,7 +32,6 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
     "oxlint": "^1.75.0",
-    "tsx": "^4.23.11",
     "typescript": "~6.0.2",
     "vite": "^8.2.0"
   }
