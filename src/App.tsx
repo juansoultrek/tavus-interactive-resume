@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import './App.css'
 import { Conversation } from './components/cvi/components/conversation'
 import {
@@ -30,6 +30,11 @@ function App() {
   const [startingPromptId, setStartingPromptId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const autoStarted = useRef(false)
+  const conversationRef = useRef<TavusConversation | null>(null)
+
+  useEffect(() => {
+    conversationRef.current = conversation
+  }, [conversation])
 
   useEffect(() => {
     let cancelled = false
@@ -49,7 +54,7 @@ function App() {
     }
   }, [])
 
-  async function handleStart(promptId?: string) {
+  const handleStart = useCallback(async (promptId?: string) => {
     setStartingPromptId(promptId ?? 'open')
     setError(null)
 
@@ -60,7 +65,7 @@ function App() {
           : {
               conversation_name: 'Interactive Resume',
               custom_greeting:
-                'Hi — ask me about my work, skills, or experience.',
+                'Hi — I am ready to talk about my work, skills, and experience. What would you like to know?',
             },
       )
       setConversation(next)
@@ -69,7 +74,7 @@ function App() {
     } finally {
       setStartingPromptId(null)
     }
-  }
+  }, [])
 
   useEffect(() => {
     if (autoStarted.current || !catalog) return
@@ -77,18 +82,19 @@ function App() {
     if (!promptId) return
     autoStarted.current = true
     void handleStart(promptId)
-  }, [catalog])
+  }, [catalog, handleStart])
 
-  async function handleLeave() {
-    if (conversation) {
-      await endConversation(conversation.conversation_id)
+  const handleLeave = useCallback(async () => {
+    const current = conversationRef.current
+    if (current) {
+      await endConversation(current.conversation_id)
     }
     setConversation(null)
 
     const url = new URL(window.location.href)
     url.searchParams.delete('prompt')
     window.history.replaceState({}, '', url.pathname + url.search)
-  }
+  }, [])
 
   function toggleCategory(categoryId: string) {
     setOpenCategoryId((current) => (current === categoryId ? null : categoryId))

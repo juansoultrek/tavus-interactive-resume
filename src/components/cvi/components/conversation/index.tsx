@@ -177,22 +177,24 @@ export const Conversation = React.memo(({ onLeave, conversationUrl }: Conversati
 	const { joinCall, leaveCall } = useCVICall();
 	const meetingState = useMeetingState();
 	const { hasMicError } = useDevices();
+	const onLeaveRef = useRef(onLeave);
+
+	useEffect(() => {
+		onLeaveRef.current = onLeave;
+	}, [onLeave]);
 
 	useEffect(() => {
 		if (meetingState === 'error') {
-			onLeave();
+			onLeaveRef.current();
 		}
-	}, [meetingState, onLeave]);
+	}, [meetingState]);
 
 	useEffect(() => {
 		joinCall({ url: conversationUrl });
-		// Release the singleton call on unmount: otherwise the next mount's join()
-		// is rejected ("already joined meeting") and the stale room's death ends
-		// the new conversation via onLeave above. Also StrictMode-safe.
 		return () => {
 			leaveCall();
 		};
-	}, []);
+	}, [conversationUrl, joinCall, leaveCall]);
 
 	const handleLeave = useCallback(() => {
 		leaveCall();
