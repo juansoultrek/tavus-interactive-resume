@@ -1,1 +1,38 @@
-/* App styles — filled in as the UI grows */
+.home {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+}
+
+.home h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+}
+
+.home p {
+  margin: 0 0 1.25rem;
+  line-height: 1.5;
+  color: #333;
+}
+
+.home button {
+  font: inherit;
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+}
+
+.home button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.error {
+  margin-top: 1rem;
+  color: #b00020;
+}
+
+.call {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+}
