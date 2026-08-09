@@ -113,13 +113,9 @@ Passenger-style hosts can use **`server.js`** as the startup file.
 
 ## Deploy workflow (optional)
 
-[`.github/workflows/deploy-ssh.yml`](.github/workflows/deploy-ssh.yml) is **optional**. It is wired for the author’s SSH/cPanel deploy (GitHub Secrets + remote extract + `tmp/restart.txt`).
+> **Author deploy only.** [`.github/workflows/deploy-ssh.yml`](.github/workflows/deploy-ssh.yml) is wired for the author’s SSH/cPanel host (GitHub Secrets + remote extract + `tmp/restart.txt`). If you clone this repo to run it locally, **ignore or delete** `.github/workflows/` — you do not need it. Without the author’s secrets, Actions will **not** deploy to their server.
 
-If you clone this repo:
-
-- You **do not need** that workflow to run the app locally.
-- Leave it unused, delete it, or replace it with your own hosting.
-- Extra notes (SCP for private prompts/bio): [docs/DEPLOY.md](docs/DEPLOY.md).
+Extra notes (SCP for private prompts/bio): [docs/DEPLOY.md](docs/DEPLOY.md).
 
 Do **not** put the workflow in `.gitignore` if you still want Actions to deploy *your* fork when you push — clones simply skip configuring those secrets.
 
