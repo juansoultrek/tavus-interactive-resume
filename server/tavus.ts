@@ -42,6 +42,12 @@ function buildCreateBody(input: CreateConversationInput): Record<string, unknown
     body.custom_greeting = input.custom_greeting
   }
 
+  // Keep guided prompts short so visitors don't burn conversation minutes.
+  body.properties = {
+    max_call_duration: 120,
+    participant_absent_timeout: 60,
+  }
+
   return body
 }
 
@@ -86,7 +92,8 @@ export async function syncPalSystemPrompt(): Promise<{ synced: boolean; hash: st
     },
   )
 
-  if (!response.ok) {
+  // 304 = unchanged remotely; treat as success so conversations can still start.
+  if (!response.ok && response.status !== 304) {
     const data = (await response.json().catch(() => ({}))) as Record<string, unknown>
     const message =
       (typeof data.message === 'string' && data.message) ||
