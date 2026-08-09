@@ -1,0 +1,20 @@
+server/tavus.ts
+  s_58fe18253b1d20::t_52630922a367e2 95-96
+  s_58fe18253b1d20::t_770c31eb9c8b01 45-50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "e4f6563ad8aa509f5edc8279a4dcbeca92bcb9f7",
+  "prompts": {},
+  "sessions": {
+    "s_58fe18253b1d20": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "09aa329b-ffdb-4477-ac80-70b79fdc071c",
+        "model": "grok-4.5"
+      },
+      "human_author": "Juan <juan.villegas@formstack.com>"
+    }
+  }
+}
