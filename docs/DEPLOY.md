@@ -14,7 +14,7 @@ GitHub Secrets (typical):
 - `DEPLOY_SSH_PRIVATE_KEY`
 - `DEPLOY_REMOTE_APP_DIR`
 
-On the host: Node app, startup file `server.js`, env vars from `.env.example`.
+On the host: Node app, startup file **`server.cjs`** (CommonJS — Passenger/LiteSpeed `require()` cannot load the ESM `server.js`), env vars from `.env.example`.
 
 ## Private content via SCP
 

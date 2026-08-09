@@ -107,7 +107,7 @@ npm start
 
 Express serves the Vite `dist/` build and the API. **`npm start` does not load `.env`** — export vars in the shell or your host’s process manager.
 
-Passenger-style hosts can use **`server.js`** as the startup file.
+Passenger-style hosts must use **`server.cjs`** as the startup file (LiteSpeed `require()` cannot load ESM `server.js`).
 
 ---
 

@@ -44,7 +44,7 @@ jobs:
             config/prompts.example.json \
             package.json \
             package-lock.json \
-            server.js \
+            server.cjs \
             node_modules
 
       - name: Upload bundle via SCP
@@ -79,6 +79,10 @@ jobs:
             rm -f deploy-bundle.tar.gz
             if [ ! -f config/prompts.json ] && [ -f config/prompts.example.json ]; then
               cp config/prompts.example.json config/prompts.json
+            fi
+            # LiteSpeed/Passenger require()s the startup file — must be CommonJS.
+            if [ -f .htaccess ]; then
+              sed -i 's/PassengerStartupFile[[:space:]]\+server\.js/PassengerStartupFile server.cjs/' .htaccess || true
             fi
             mkdir -p tmp
             touch tmp/restart.txt
