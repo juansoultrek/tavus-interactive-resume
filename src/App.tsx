@@ -22,6 +22,10 @@ function readPromptIdFromUrl(): string | null {
   return null
 }
 
+function isEmbedMode(): boolean {
+  return new URLSearchParams(window.location.search).get('embed') === '1'
+}
+
 function App() {
   const [catalog, setCatalog] = useState<PublicCatalog | null>(null)
   const [catalogError, setCatalogError] = useState<string | null>(null)
@@ -31,6 +35,7 @@ function App() {
   const [error, setError] = useState<string | null>(null)
   const autoStarted = useRef(false)
   const conversationRef = useRef<TavusConversation | null>(null)
+  const embed = isEmbedMode()
 
   useEffect(() => {
     conversationRef.current = conversation
@@ -94,7 +99,11 @@ function App() {
     const url = new URL(window.location.href)
     url.searchParams.delete('prompt')
     window.history.replaceState({}, '', url.pathname + url.search)
-  }, [])
+
+    if (embed && window.parent !== window) {
+      window.parent.postMessage({ type: 'tavus-talk-ended' }, '*')
+    }
+  }, [embed])
 
   function toggleCategory(categoryId: string) {
     setOpenCategoryId((current) => (current === categoryId ? null : categoryId))
@@ -102,12 +111,27 @@ function App() {
 
   if (conversation) {
     return (
-      <div className="call">
+      <div className={embed ? 'call call-embed' : 'call'}>
         <Conversation
           conversationUrl={conversation.conversation_url}
           onLeave={handleLeave}
         />
       </div>
+    )
+  }
+
+  // Parent site owns the prompt UI — do not show the lab botonera in embed mode.
+  if (embed) {
+    return (
+      <main className="home home-embed">
+        {catalogError || error ? (
+          <p className="error" role="alert">
+            {catalogError || error}
+          </p>
+        ) : (
+          <p className="muted">Starting conversation…</p>
+        )}
+      </main>
     )
   }
 
