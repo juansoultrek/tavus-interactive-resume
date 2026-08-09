@@ -1,0 +1,22 @@
+src/App.css
+  s_58fe18253b1d20::t_9d99b79f1e3f1d 7-18
+src/App.tsx
+  s_58fe18253b1d20::t_ee6fc480486131 25-28,38,102-106,114,123-134
+  s_58fe18253b1d20::t_01b14d0f83b578 135-137
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "e3adb64db21067b75335be63a576e6c17d64b1d3",
+  "prompts": {},
+  "sessions": {
+    "s_58fe18253b1d20": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "09aa329b-ffdb-4477-ac80-70b79fdc071c",
+        "model": "grok-4.5"
+      },
+      "human_author": "Juan <juan.villegas@formstack.com>"
+    }
+  }
+}
